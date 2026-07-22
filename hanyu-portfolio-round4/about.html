@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About — Hanyu Liu</title>
+<meta name="view-transition" content="same-origin">
+<link rel="stylesheet" href="style.css">
+<script src="site.js" defer></script>
+<style>
+  .card{
+    max-width:520px; margin:9vh auto 0; text-align:center; padding:0 28px;
+  }
+  .avatar{
+    width:128px; height:128px; border-radius:50%; margin:0 auto 22px; overflow:hidden;
+    border:1px solid var(--line); background:linear-gradient(135deg,#1a2233,#2c3850);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .avatar img{ width:100%; height:100%; object-fit:cover; }
+  .avatar .mono{ color:#fff; font-size:36px; font-weight:650; letter-spacing:.04em; }
+  h1{ font-size:26px; font-weight:680; letter-spacing:-0.01em; margin:0 0 8px; }
+  .line{ font-size:14px; color:var(--dim); line-height:1.7; margin:0 0 30px; }
+  .btns{ display:flex; flex-direction:column; gap:11px; }
+  .btn{
+    display:flex; align-items:center; justify-content:center; gap:9px;
+    border:1px solid var(--line); border-radius:12px; background:var(--panel);
+    padding:14px 18px; font-size:14px; font-weight:600; color:var(--ink); text-decoration:none;
+    transition:transform .2s ease, box-shadow .2s ease;
+  }
+  .btn:hover{ transform:translateY(-2px); box-shadow:0 8px 22px rgba(26,34,51,0.08); }
+  .btn svg{ width:16px; height:16px; flex:0 0 auto; }
+  .btn.primary{ background:var(--ink); color:#fff; border-color:var(--ink); }
+  .sub{ margin-top:26px; font-size:12.5px; color:var(--faint); line-height:1.8; }
+</style>
+</head>
+<body>
+  <div class="stickybar">
+    <a class="sb-h" href="index.html" title="Hanyu Liu">H</a>
+    <nav>
+      <a href="index.html">Work</a>
+      <a href="vibe-coding.html">Vibe Coding</a>
+      <a href="about.html" class="active">About</a>
+    </nav>
+    <a class="sb-l" href="index.html" title="Hanyu Liu">L</a>
+  </div>
+
+  <header class="sitehead">
+    <a class="mark cols4" href="index.html">
+      <span class="m1">H</span>
+      <span class="m2">L</span>
+    </a>
+    <div class="hbar cols4">
+      <div class="hb role">
+        <div>Business &amp; Spatial</div>
+        <div>Strategist</div>
+      </div>
+      <div class="hb nav">
+        <nav>
+          <a href="index.html">Work</a>
+          <a href="vibe-coding.html">Vibe Coding</a>
+          <a href="about.html" class="active">About</a>
+        </nav>
+      </div>
+      <div class="hb status"><span class="dot"></span>Open to projects</div>
+      <div class="hb contact">
+        <a href="mailto:summerhanyu@gmail.com">summerhanyu@gmail.com</a>
+        <div>NYC / remote</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="card">
+    <div class="avatar">
+      <img src="assets/portrait.jpg" alt="Hanyu Liu"
+           onerror="this.style.display='none'; this.parentNode.innerHTML='&lt;span class=&quot;mono&quot;&gt;HL&lt;/span&gt;'">
+    </div>
+    <h1>Hanyu Liu 刘菡雨</h1>
+    <p class="line">Business &amp; spatial strategist who builds the tools she recommends.<br>
+       Columbia M.S. · UW Architecture · New York City</p>
+
+    <div class="btns">
+      <a class="btn primary" href="assets/resume.pdf" download>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download resume (PDF)
+      </a>
+      <a class="btn" href="https://www.linkedin.com/in/YOUR-LINKEDIN-HANDLE" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
+        LinkedIn
+      </a>
+      <a class="btn" href="mailto:summerhanyu@gmail.com">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        summerhanyu@gmail.com
+      </a>
+    </div>
+
+    <p class="sub">WeChat liuhanyuer · Mandarin / English / French<br>
+       Willing to relocate · both sides of the Pacific</p>
+  </div>
+
+  <footer class="sitefoot" style="margin-top:8vh">© Hanyu Liu</footer>
+</body>
+</html>
