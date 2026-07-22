@@ -7,6 +7,7 @@
 <meta name="description" content="Business & spatial strategist who builds the tools she recommends. Brand globalization, site selection, supply-chain digitalization.">
 <meta name="view-transition" content="same-origin">
 <link rel="stylesheet" href="style.css">
+<script src="site.js" defer></script>
 <style>
   .hero{ padding:30px 0 6px; }
   .hero p{ font-size:14.5px; color:var(--dim); max-width:600px; line-height:1.65; margin:0; }
@@ -15,11 +16,20 @@
 </head>
 <body>
 
+  <div class="stickybar">
+    <a class="sb-brand" href="index.html">HANYU LIU</a>
+    <nav>
+      <a href="index.html" class="active">Work</a>
+      <a href="vibe-coding.html">Vibe Coding</a>
+      <a href="about.html">About</a>
+    </nav>
+  </div>
+
   <header class="sitehead">
-    <div class="mark cols4">
+    <a class="mark cols4" href="index.html">
       <span class="m1">H</span>
       <span class="m2">L</span>
-    </div>
+    </a>
     <div class="hbar cols4">
       <div class="hb role">
         <div>Business &amp; Spatial</div>
@@ -49,13 +59,9 @@
 
     <div class="pgrid">
 
-      <div class="prow">
+      <div class="pcard">
         <div class="phead">
-          <div>
-            <div class="pt">VATICA Node Reminder</div>
-            <div class="pc">Case study</div>
-            <div class="pd">680 orders, 37 columns, one rule — a zero-cost alert pipeline for a garment manufacturer, rebuilt as a live simulation.</div>
-          </div>
+          <div><div class="pt">VATICA Node Reminder</div><div class="pc">Case study</div></div>
           <div class="pid">06</div>
         </div>
         <a class="ptile" href="cases/vatica-node-reminder.html">
@@ -66,13 +72,9 @@
         </a>
       </div>
 
-      <div class="prow">
+      <div class="pcard">
         <div class="phead">
-          <div>
-            <div class="pt">Threshold Field</div>
-            <div class="pc">Live demo</div>
-            <div class="pd">Drag four real SOP parameters and watch a production schedule stay calm — or cascade.</div>
-          </div>
+          <div><div class="pt">Threshold Field</div><div class="pc">Live demo</div></div>
           <div class="pid">05</div>
         </div>
         <a class="ptile" href="demos/vatica-threshold-field.html">
@@ -81,30 +83,22 @@
         </a>
       </div>
 
-      <div class="prow">
+      <div class="pcard">
         <div class="phead">
-          <div>
-            <div class="pt">Vibe Coding</div>
-            <div class="pc">Process</div>
-            <div class="pd">How a conversation becomes a tool, an abstraction, then this site.</div>
-          </div>
+          <div><div class="pt">Vibe Coding</div><div class="pc">Process</div></div>
           <div class="pid">04</div>
         </div>
         <a class="ptile" href="vibe-coding.html">
           <span class="badge live">Process</span>
-          <div class="pmedia ph-code" style="display:flex;align-items:center;padding:22px 24px;">
+          <div class="pmedia ph-code" style="display:flex;align-items:center;padding:16px 18px;">
             days = (due − today).dt.days
           </div>
         </a>
       </div>
 
-      <div class="prow">
+      <div class="pcard">
         <div class="phead">
-          <div>
-            <div class="pt">POCOO Green Life</div>
-            <div class="pc">Brand · 0→1</div>
-            <div class="pd">Founding a sustainable consumer brand 0→1 — Kickstarter-funded, 2M+ impressions. Visual case in progress.</div>
-          </div>
+          <div><div class="pt">POCOO Green Life</div><div class="pc">Brand · 0→1</div></div>
           <div class="pid">03</div>
         </div>
         <div class="ptile">
@@ -113,13 +107,9 @@
         </div>
       </div>
 
-      <div class="prow">
+      <div class="pcard">
         <div class="phead">
-          <div>
-            <div class="pt">Spatial Strategy at Glenbrook</div>
-            <div class="pc">Location intelligence</div>
-            <div class="pd">300K+ points of census, POI &amp; mobility data → market screening for 20+ AI &amp; consumer-tech clients.</div>
-          </div>
+          <div><div class="pt">Spatial Strategy at Glenbrook</div><div class="pc">Location intelligence</div></div>
           <div class="pid">02</div>
         </div>
         <div class="ptile">
@@ -128,9 +118,9 @@
         </div>
       </div>
 
-      <div class="prow">
+      <div class="pcard">
         <div class="phead">
-          <div><div class="pt">+ Next project</div><div class="pc">This grid grows one at a time</div></div>
+          <div><div class="pt">+ Next project</div><div class="pc">Grows one at a time</div></div>
           <div class="pid">01</div>
         </div>
         <div class="ptile slot">

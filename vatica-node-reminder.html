@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VATICA Node Reminder — Case Study · Hanyu Liu</title>
+<link rel="stylesheet" href="../style.css">
+<script src="../site.js" defer></script>
+<style>
+  .kicker{ font-size:11px; letter-spacing:.26em; text-transform:uppercase; color:var(--faint); margin-bottom:10px; }
+  h1{ font-size:clamp(21px,2.6vw,27px); font-weight:680; letter-spacing:-0.02em; margin:0 0 8px; line-height:1.28; }
+  .lede{ font-size:13.5px; color:var(--dim); line-height:1.6; margin:0; }
+
+  .demo-hint{ font-size:11.5px; color:var(--faint); margin-top:-8px; text-align:center; line-height:1.5; }
+
+  h2{ font-size:17px; font-weight:650; margin:38px 0 11px; letter-spacing:-0.01em; }
+  p{ font-size:14px; line-height:1.72; color:#3a4356; margin:0 0 15px; }
+  p b{ color:var(--ink); }
+  .pull{ border-left:3px solid var(--amber); padding:4px 0 4px 16px; margin:22px 0;
+    font-size:15px; line-height:1.6; color:var(--ink); font-weight:500; }
+  pre{ background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px 16px;
+    font-family:"SF Mono",Menlo,Consolas,monospace; font-size:11.5px; line-height:1.7; overflow-x:auto; color:#3a4356; }
+  pre em{ font-style:normal; color:var(--amber); font-weight:600; }
+
+  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:18px 0; }
+  @media (max-width:480px){ .grid2{ grid-template-columns:1fr; } }
+  .fact{ border:1px solid var(--line); border-radius:10px; background:#fff; padding:14px 16px; }
+  .fact b{ display:block; font-size:20px; font-weight:650; margin-bottom:3px; font-variant-numeric:tabular-nums; }
+  .fact span{ font-size:12px; color:var(--dim); line-height:1.5; }
+  .fact.a b{ color:var(--amber);} .fact.r b{ color:var(--red);} .fact.t b{ color:var(--teal);}
+</style>
+</head>
+<body>
+  <div class="stickybar">
+    <a class="sb-brand" href="../index.html">HANYU LIU</a>
+    <nav>
+      <a href="../index.html" class="active">Work</a>
+      <a href="../vibe-coding.html">Vibe Coding</a>
+      <a href="../about.html">About</a>
+    </nav>
+  </div>
+
+  <header class="sitehead">
+    <a class="mark cols4" href="../index.html">
+      <span class="m1">H</span>
+      <span class="m2">L</span>
+    </a>
+    <div class="hbar cols4">
+      <div class="hb role">
+        <div>Business &amp; Spatial</div>
+        <div>Strategist</div>
+      </div>
+      <div class="hb nav">
+        <nav>
+          <a href="../index.html" class="active">Work</a>
+          <a href="../vibe-coding.html">Vibe Coding</a>
+          <a href="../about.html">About</a>
+        </nav>
+      </div>
+      <div class="hb status"><span class="dot"></span>Open to projects</div>
+      <div class="hb contact">
+        <a href="mailto:summerhanyu@gmail.com">summerhanyu@gmail.com</a>
+        <div>NYC / remote</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="pdethead">
+    <a class="back" href="../index.html">← All work</a>
+  </div>
+
+  <div class="pdcase">
+
+    <!-- LEFT — sticky media rail: scrolls its own contents, pinned while the text column reads down -->
+    <div class="pdmedia-col">
+      <span class="badge case" style="position:static;display:inline-block;">Case study</span>
+      <img class="vt-vatica" src="../assets/vatica-thumb.jpg" alt="VATICA node reminder — threshold trigger simulation">
+      <iframe src="../demos/vatica-threshold-field.html" title="Interactive threshold-field demo"></iframe>
+      <div class="demo-hint">Each dot is a production node · amber ring = a reminder email fired · red = overdue, escalating</div>
+      <img src="../assets/vatica-qc-lab.jpg" alt="VATICA quality control lab — three technicians at evenly spaced testing stations">
+      <div class="cap"><b>The floor the dots stand in for</b> — a station per node, one rule applied identically at every one of them</div>
+      <img src="../assets/vatica-factory-floor.jpg" alt="VATICA production floor — garments on an overhead conveyor rail">
+      <div class="cap">The production floor these 680 rows describe — a rail full of orders, each one a row in the sheet.</div>
+    </div>
+
+    <!-- RIGHT — gray text column: metadata panel, then the full narrative, read by scrolling down -->
+    <div class="pdtext-col">
+      <div class="kicker">Case Study · 2026</div>
+      <h1>VATICA Node Reminder — a threshold trigger in a distance field</h1>
+      <p class="lede">680 outsourced garment orders, 37 schedule columns, one rule. The four sliders in the demo are the production tool's actual parameters.</p>
+
+      <div class="pdrow"><span class="k">ID</span><span class="v">06</span></div>
+      <div class="pdrow"><span class="k">Year</span><span class="v">2026</span></div>
+      <div class="pdrow"><span class="k">Client</span><span class="v">VATICA — garment manufacturer, 2.2M pcs/yr</span></div>
+      <div class="pdrow"><span class="k">Role</span><span class="v">Product Dev &amp; CEO Assistant</span></div>
+      <div class="pdrow"><span class="k">What I did</span><span class="v list"><div>Research</div><div>Systems design</div><div>Code</div><div>Motion</div></span></div>
+      <div class="pdrow"><span class="k">Stack</span><span class="v">Python · pandas · SMTP · Canvas</span></div>
+      <div class="pdrow"><span class="k">Cost to run</span><span class="v">¥0 — no AI, no platform, no server</span></div>
+      <div class="pdrow"><span class="k">Status</span><span class="v">In production</span></div>
+
+      <h2>The mess</h2>
+      <p>VATICA outsources garment production and tracks every order in one Excel sheet:
+         <b>680 live orders × 37 schedule columns</b> — costing sign-off, three-stage approval,
+         fabric &amp; trim purchase, pre-production samples, bulk production, delivery.
+         Planners chased each node by memory and by shouting across departments.
+         When I profiled a real snapshot: 304 orders short on fabric, 325 short on trims,
+         and of 207 pre-production samples due, only 4 had a completion date filled in.</p>
+
+      <h2>The insight</h2>
+      <p>Strip away the Excel and SMTP shell, and the whole follow-up SOP is three expressions:</p>
+      <pre>days    = (due − today).dt.days     <em># distance to "now"</em>
+warn    = days.between(0, AHEAD)    <em># inside look-ahead → fire</em>
+overdue = days &lt; 0                  <em># crossed zero → escalate</em></pre>
+      <div class="pull">It's a threshold trigger in a distance field. Every node is a dot;
+        time is the wave; the look-ahead window is the wave's radius.
+        Nothing needs AI — the risk logic is pure arithmetic on dates.</div>
+
+      <h2>What shipped</h2>
+      <p>A local Python pipeline that reads the tracking sheet every morning, applies the rule to all
+         680 orders, groups hits by owner, and sends <b>one email per person</b> through the company's
+         existing NetEase mailbox — purchasing gets its fabric list, each sales rep gets their own orders,
+         overdue rows pinned red on top. A config workbook (contacts, rules, thresholds) is the only thing
+         staff ever touch. Reminders stop the moment someone backfills the completion date —
+         which quietly fixed the data-hygiene problem too.</p>
+      <div class="grid2">
+        <div class="fact"><b>680</b><span>orders scanned per run, 37 columns each</span></div>
+        <div class="fact a"><b>510</b><span>action items found &amp; routed in the first real run</span></div>
+        <div class="fact t"><b>14</b><span>owners — each receives only their own list</span></div>
+        <div class="fact r"><b>435</b><span>high-risk items surfaced that were previously invisible</span></div>
+      </div>
+
+      <h2>Why the simulation exists</h2>
+      <p>To explain the system to a non-technical CEO — and to make the abstraction visible —
+         I rebuilt the trigger as the live piece on the left. Drag the response rate down
+         and watch red pile up left of the TODAY line; widen the look-ahead window and watch issues
+         surface before they cascade. The argument makes itself.</p>
+
+      <h2>What I'd tell another team</h2>
+      <p>The most valuable move wasn't writing code — it was noticing that <b>the alert logic never
+         needed a model</b>. Deadline math is deterministic; language models only earn their keep at the
+         edges (drafting customer-facing emails). Separating those two concerns is what made the tool
+         free to run, trivially auditable, and deployable inside a company that can't use foreign AI
+         services at all.</p>
+
+      <div style="margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font-size:12px;color:var(--faint);">
+        <a href="../index.html" style="color:var(--dim);text-decoration:none;">← Back to all work</a> · summerhanyu@gmail.com
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>
