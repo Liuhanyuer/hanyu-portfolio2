@@ -1,0 +1,213 @@
+/* ===== Hanyu Liu — shared design tokens ===== */
+:root{
+  --bg:#ffffff; --panel:#ffffff; --ink:#1a2233; --dim:#6b7486; --faint:#9aa3b5;
+  --line:#e6e8ee; --amber:#d97706; --amber-soft:#fef3e2; --red:#dc2626; --teal:#0d9488;
+  --violet:#7c5cff; --code:#f4f5f7; --mat:#f4f5f7;
+  --gutter:clamp(24px,3.2vw,56px);
+}
+*{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+a{ color:inherit; }
+img{ max-width:100%; display:block; }
+
+/* progressive-enhancement page transition (Chrome/Edge; no-ops elsewhere) */
+@view-transition{ navigation:auto; }
+::view-transition-old(root), ::view-transition-new(root){ animation-duration:.32s; }
+
+/* scroll-reveal (site.js adds .in when an element enters the viewport) */
+.reveal{ opacity:0; transform:translateY(16px); transition:opacity .6s ease, transform .6s ease; }
+.reveal.in{ opacity:1; transform:none; }
+
+/* full-bleed containers — fixed gutters, no centered max-width, so the
+   page fills wide monitors edge-to-edge instead of floating in a column */
+.wrap{ padding:0 var(--gutter); }
+.wrap-narrow{ max-width:760px; padding:0 var(--gutter); }
+
+/* =========================================================
+   STICKY COMPACT BAR — the big H / L mark, shrunk down but held
+   in the SAME two columns (H at the left gutter, L where the
+   big mark's second letter sits) so it reads as one continuous
+   shrink, not a swap to a different lockup. Hover either letter
+   to reveal "Hanyu Liu" as a native tooltip. Toggled by site.js
+   (.scrolled on body).
+   ========================================================= */
+.stickybar{
+  position:fixed; top:0; left:0; right:0; z-index:80;
+  display:grid; grid-template-columns:repeat(4,1fr); column-gap:16px; align-items:center;
+  padding:14px var(--gutter); background:rgba(255,255,255,.88); backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+  transform:translateY(-100%); opacity:0;
+  transition:transform .28s ease, opacity .28s ease;
+}
+body.scrolled .stickybar{ transform:translateY(0); opacity:1; }
+.stickybar .sb-h, .stickybar .sb-l{
+  font-size:24px; font-weight:800; letter-spacing:-0.03em; color:var(--ink); line-height:1;
+  text-decoration:none; justify-self:start;
+}
+.stickybar .sb-l{ grid-column:3; }
+.stickybar nav{ grid-column:2; display:flex; align-items:center; gap:22px; }
+.stickybar nav a{ font-size:13px; color:var(--dim); text-decoration:none; font-weight:500; }
+.stickybar nav a:hover{ color:var(--ink); }
+.stickybar nav a.active{ color:var(--ink); font-weight:650; }
+@media (max-width:760px){
+  .stickybar{ padding:10px 18px; grid-template-columns:repeat(2,1fr); row-gap:8px; }
+  .stickybar .sb-l{ grid-column:2; }
+  .stickybar nav{ grid-column:1/-1; gap:16px; }
+}
+
+/* =========================================================
+   SITEHEAD — big split wordmark + hairline info bar
+   shared across every page
+   ========================================================= */
+.sitehead{ padding:26px var(--gutter) 0; }
+.sitehead a{ text-decoration:none; }
+
+.cols4{ display:grid; grid-template-columns:repeat(4,1fr); column-gap:16px; }
+
+.mark{ align-items:end; padding-bottom:6px; }
+.mark span{
+  display:block; font-size:clamp(64px,9vw,150px); font-weight:800; letter-spacing:-0.04em;
+  line-height:.82; color:var(--ink);
+}
+.mark .m2{ grid-column:3; }
+
+.hbar{
+  padding:14px 0 13px; border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+  font-size:12.5px; color:var(--dim);
+}
+.hbar .hb{ line-height:1.5; }
+.hbar .hb.nav{ display:flex; align-items:flex-start; }
+.hbar .hb.nav nav{ display:flex; gap:22px; }
+.hbar .hb.nav a{ color:var(--dim); font-weight:500; }
+.hbar .hb.nav a:hover{ color:var(--ink); }
+.hbar .hb.nav a.active{ color:var(--ink); font-weight:650; }
+.hbar .hb.status{ display:flex; align-items:center; gap:7px; }
+.hbar .hb.status .dot{ width:7px; height:7px; border-radius:50%; background:var(--teal); flex:0 0 auto;
+  box-shadow:0 0 0 3px rgba(13,148,136,.15); animation:pulse 2.4s ease-in-out infinite; }
+@keyframes pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.45; } }
+.hbar .hb.contact{ text-align:right; }
+.hbar .hb.contact a{ color:var(--dim); }
+.hbar .hb.contact a:hover{ color:var(--ink); }
+
+@media (max-width:760px){
+  .sitehead{ padding:20px 18px 0; }
+  .cols4{ grid-template-columns:repeat(2,1fr); row-gap:10px; }
+  .mark .m2{ grid-column:2; }
+  .hbar .hb.contact{ text-align:left; }
+  .hbar{ padding:12px 0; }
+}
+
+footer.sitefoot{ padding:56px 0 72px; font-size:13px; color:var(--faint); text-align:center; }
+footer.sitefoot a{ color:var(--dim); text-decoration:none; }
+
+/* =========================================================
+   PROJECT GRID (index.html) — full-bleed N-across card grid
+   ========================================================= */
+.pgrid{
+  display:grid; grid-template-columns:repeat(4,1fr); column-gap:20px; row-gap:36px;
+  padding:40px 0 10px; border-top:1px solid var(--line);
+}
+.pcard .phead{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:13px; gap:10px; }
+.pcard .phead .pt{ font-size:13.5px; font-weight:650; line-height:1.3; }
+.pcard .phead .pc{ font-size:11px; color:var(--dim); margin-top:2px; }
+.pcard .phead .pid{ font-size:12px; color:var(--faint); font-variant-numeric:tabular-nums; flex:0 0 auto; }
+
+.ptile{
+  display:block; text-decoration:none; color:inherit; position:relative;
+  background:var(--mat); border-radius:4px; overflow:hidden;
+  padding:12px 12px 0;
+  transition:box-shadow .3s ease;
+}
+.ptile:hover{ box-shadow:inset 0 0 0 1px var(--line); }
+.ptile .pmedia{
+  min-height:170px; aspect-ratio:4/3.1; overflow:hidden; position:relative;
+  border-radius:2px 2px 0 0;
+  transition:transform .5s cubic-bezier(.2,.8,.2,1);
+}
+.ptile:hover .pmedia{ transform:scale(1.02); }
+.ptile .pmedia img{ width:100%; height:100%; object-fit:cover; display:block; }
+.ptile .badge{
+  position:absolute; top:22px; left:22px; font-size:9.5px; font-weight:650; letter-spacing:.07em;
+  text-transform:uppercase; background:rgba(255,255,255,0.92); border:1px solid var(--line);
+  border-radius:100px; padding:3px 9px; z-index:2;
+}
+.badge.live{ color:var(--teal); } .badge.case{ color:var(--amber); } .badge.soon{ color:var(--faint); }
+
+/* flat, muted swatches for projects that don't have real screenshots yet —
+   plain single colors, no gradients/patterns/text, like a physical color card */
+.sw-slate{ background:#aab0c4; }
+.sw-stone{ background:#8f9299; }
+.sw-clay{  background:#c9503f; }
+.sw-teal{  background:#3d7f8f; }
+.sw-ink{   background:#181c24; }
+.sw-sand{  background:#b7a179; }
+.sw-cream{ background:#e9e4d8; }
+.sw-crimson{ background:#5c1a24; }
+
+/* homepage-only poster/collage tile — several real photos combined into one
+   card image. Detail pages never use this; they lead with the live demo. */
+.poster{ display:grid; grid-template-rows:1fr .58fr; gap:3px; width:100%; height:100%; }
+.poster .p-main, .poster .p-cell{ overflow:hidden; }
+.poster .p-strip{ display:grid; grid-template-columns:1fr 1fr; gap:3px; }
+.poster img{ width:100%; height:100%; object-fit:cover; display:block; }
+
+.ptile.slot{ border:1px dashed var(--line); background:transparent; }
+.ptile.slot .pmedia{ display:flex; align-items:center; justify-content:center;
+  color:var(--faint); font-size:12px; text-align:center; padding:14px; }
+.ptile.slot:hover{ box-shadow:none; }
+
+@media (max-width:980px){ .pgrid{ grid-template-columns:repeat(2,1fr); } }
+@media (max-width:560px){ .pgrid{ grid-template-columns:1fr; row-gap:30px; } }
+
+/* =========================================================
+   PROJECT DETAIL — sticky media rail (left) + scrolling
+   gray text column (right): metadata + full case narrative
+   ========================================================= */
+.pdethead{ padding:8px var(--gutter) 0; }
+.pdethead .back{ font-size:12px; color:var(--faint); text-decoration:none; }
+.pdethead .back:hover{ color:var(--dim); }
+
+.pdcase{
+  margin:18px 0 0;
+  display:grid; grid-template-columns:1.3fr 1fr; align-items:start;
+}
+.pdcase .pdmedia-col{
+  display:flex; flex-direction:column; gap:16px; padding:0 24px 40px var(--gutter);
+  position:sticky; top:26px;
+}
+.pdcase .pdmedia-col img, .pdcase .pdmedia-col iframe{
+  width:100%; border-radius:10px; border:1px solid var(--line); display:block; background:#fff;
+}
+.pdcase .pdmedia-col iframe{ aspect-ratio:16/9.4; }
+.pdcase .pdmedia-col .cap{ font-size:12px; color:var(--faint); margin-top:-8px; line-height:1.5; }
+.pdcase .pdmedia-col .cap b{ color:var(--dim); font-weight:600; }
+
+.pdcase .pdtext-col{
+  background:var(--mat); padding:32px var(--gutter) 70px 30px; min-height:100vh;
+}
+.pdcase .pdtitle{ font-size:17px; font-weight:650; }
+.pdcase .pdtype{ font-size:12px; color:var(--dim); margin-top:2px; margin-bottom:4px; }
+
+.pdrow{ display:flex; justify-content:space-between; gap:16px; padding:11px 0; border-top:1px solid var(--line);
+  font-size:12.5px; }
+.pdrow:first-of-type{ margin-top:14px; }
+.pdrow .k{ color:var(--faint); flex:0 0 auto; }
+.pdrow .v{ color:var(--dim); text-align:right; }
+.pdrow .v.list{ text-align:right; }
+.pdrow .v.list div{ margin-bottom:2px; }
+.pdrow .v a{ color:var(--amber); font-weight:600; text-decoration:none; }
+.pdrow .v a:hover{ text-decoration:underline; }
+
+@media (max-width:860px){
+  .pdcase{ grid-template-columns:1fr; }
+  .pdcase .pdmedia-col{ position:static; padding:0 18px; }
+  .pdcase .pdtext-col{ padding:28px 18px 50px; min-height:0; }
+}
+
+/* view-transition names — give matching grid tile + detail hero the same name to morph between them */
+.vt-vatica{ view-transition-name:vt-vatica; }
