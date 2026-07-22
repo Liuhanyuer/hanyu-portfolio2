@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VATICA Jersey Configurator — Real-Time 3D Fitting Room</title>
+<style>
+  :root{
+    --bg:#fbfbfa; --panel:#ffffff; --ink:#1a2233; --ink-dim:#6b7486; --ink-faint:#9aa3b5;
+    --line:#e6e8ee; --amber:#d97706; --amber-soft:rgba(217,119,6,0.08);
+    --red:#dc2626; --teal:#0d9488; --code-bg:#f4f5f7;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; height:100%; background:var(--bg); overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Helvetica,Arial,sans-serif;
+    color:var(--ink); }
+  #wrap{ display:flex; flex-direction:column; height:100vh; padding:24px 32px 18px; gap:0; }
+
+  header{ display:flex; justify-content:space-between; align-items:flex-start; flex:0 0 auto; gap:20px; }
+  .kicker{ font-size:10.5px; letter-spacing:.26em; color:var(--ink-faint); text-transform:uppercase; margin-bottom:7px; }
+  h1{ margin:0 0 5px; font-size:20px; font-weight:650; letter-spacing:-0.01em; }
+  .sub{ font-size:12.5px; color:var(--ink-dim); max-width:520px; line-height:1.55; }
+  .sub b{ color:var(--ink); font-weight:600; }
+
+  .readout{ text-align:right; flex:0 0 auto; }
+  .readout .deg{ font-family:"SF Mono",Menlo,Consolas,monospace; font-size:22px; font-weight:650;
+    color:var(--ink); font-variant-numeric:tabular-nums; }
+  .readout .facing{ font-size:10.5px; letter-spacing:.16em; color:var(--amber); font-weight:650; margin-top:2px; }
+  .readout .hint{ font-size:10.5px; color:var(--ink-faint); margin-top:6px; max-width:150px; margin-left:auto; line-height:1.4; }
+
+  #stage{ position:relative; flex:1 1 auto; min-height:0; margin:12px 0 14px; border-radius:12px;
+    background:radial-gradient(ellipse at 50% 30%, #ffffff 0%, #f2f3f6 68%, #eceef2 100%);
+    border:1px solid var(--line); overflow:hidden; cursor:grab; }
+  #stage.dragging{ cursor:grabbing; }
+  #stage canvas{ position:absolute; inset:0; display:block; width:100%; height:100%; }
+
+  .snaprow{ position:absolute; left:16px; bottom:14px; display:flex; gap:6px; z-index:3; }
+  .snaprow button{ font:inherit; font-size:10.5px; font-weight:650; letter-spacing:.05em; color:var(--ink-dim);
+    background:rgba(255,255,255,.85); border:1px solid var(--line); border-radius:100px; padding:5px 12px;
+    cursor:pointer; backdrop-filter:blur(6px); }
+  .snaprow button:hover{ color:var(--ink); border-color:var(--ink-faint); }
+  .snaprow button.on{ color:var(--amber); border-color:var(--amber); }
+
+  .loadtag{ position:absolute; left:16px; top:14px; font-size:10.5px; color:var(--ink-faint); z-index:3;
+    background:rgba(255,255,255,.85); border:1px solid var(--line); border-radius:100px; padding:5px 12px; }
+
+  .controls{ flex:0 0 auto; display:grid; grid-template-columns:1.15fr 1fr 1fr; gap:14px; }
+  .ctl{ background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:12px 14px 13px; }
+  .ctl .oplabel{ font-size:11.5px; font-weight:650; margin-bottom:9px; display:flex; justify-content:space-between; align-items:baseline; }
+  .ctl .oplabel .n{ font-family:"SF Mono",Menlo,Consolas,monospace; font-size:10px; color:var(--ink-faint); font-weight:500; }
+
+  .swatches{ display:flex; gap:8px; flex-wrap:wrap; }
+  .sw-btn{ flex:1 1 74px; border:1.5px solid var(--line); border-radius:8px; padding:6px 7px; cursor:pointer;
+    background:#fff; text-align:left; transition:border-color .15s ease; }
+  .sw-btn:hover{ border-color:var(--ink-faint); }
+  .sw-btn.on{ border-color:var(--ink); box-shadow:0 0 0 1px var(--ink); }
+  .sw-btn .chip{ display:flex; gap:3px; height:16px; border-radius:4px; overflow:hidden; margin-bottom:6px; }
+  .sw-btn .chip i{ flex:1; display:block; }
+  .sw-btn .lbl{ font-size:10px; font-weight:650; color:var(--ink); }
+
+  .custom-row{ display:flex; gap:10px; margin-top:10px; padding-top:10px; border-top:1px solid var(--line); }
+  .custom-row.hidden{ display:none; }
+  .cpick{ flex:1; text-align:center; }
+  .cpick label{ display:block; font-size:9.5px; color:var(--ink-faint); letter-spacing:.05em; text-transform:uppercase; margin-bottom:4px; }
+  .cpick input[type=color]{ width:100%; height:26px; border:1px solid var(--line); border-radius:6px; padding:2px; background:none; cursor:pointer; }
+
+  .field{ margin-bottom:10px; }
+  .field:last-child{ margin-bottom:0; }
+  .field label{ display:block; font-size:9.5px; color:var(--ink-faint); letter-spacing:.06em; text-transform:uppercase; margin-bottom:5px; }
+  .field input[type=text]{ width:100%; font:inherit; font-family:"SF Mono",Menlo,Consolas,monospace; font-size:14px;
+    font-weight:650; letter-spacing:.03em; color:var(--ink); border:1px solid var(--line); border-radius:7px;
+    padding:7px 10px; background:var(--code-bg); }
+  .field input[type=text]:focus{ outline:none; border-color:var(--ink-faint); }
+  .field .cap{ font-size:10px; color:var(--ink-faint); margin-top:4px; line-height:1.4; }
+
+  .stats{ display:flex; gap:22px; align-items:baseline; padding-top:11px; flex:0 0 auto; }
+  .stat{ display:flex; align-items:baseline; gap:6px; font-size:11.5px; color:var(--ink-dim); }
+  .stat .n{ font-size:14px; font-weight:650; color:var(--ink); font-variant-numeric:tabular-nums; }
+  .stat.s-amber .n{ color:var(--amber); }
+
+  @media (max-width:820px){
+    .controls{ grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <header>
+    <div>
+      <div class="kicker">Concept Demo — Real-Time 3D · VATICA Custom Teamwear</div>
+      <h1>A fitting room for a jersey that doesn't exist yet</h1>
+      <div class="sub">Vatica's current customizer is a grid of flat, pre-rendered mockups —
+        <b>fixed name, fixed number, fixed colors.</b> This is the same idea rebuilt in real WebGL:
+        drag the garment, swap the colorway, type a name — nothing here was pre-rendered.</div>
+    </div>
+    <div class="readout">
+      <div class="deg" id="deg">000°</div>
+      <div class="facing" id="facing">FRONT</div>
+      <div class="hint">Drag left/right on the jersey to spin it</div>
+    </div>
+  </header>
+
+  <div id="stage">
+    <div class="loadtag" id="loadtag">Loading WebGL…</div>
+    <div class="snaprow">
+      <button id="btnFront" class="on">FRONT</button>
+      <button id="btnBack">BACK</button>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="ctl">
+      <div class="oplabel">Colorway<span class="n">3 presets · unlimited custom</span></div>
+      <div class="swatches" id="swatches"></div>
+      <div class="custom-row hidden" id="customRow">
+        <div class="cpick"><label>Body</label><input type="color" id="cBody" value="#1a2233"></div>
+        <div class="cpick"><label>Side panel</label><input type="color" id="cSide" value="#d97706"></div>
+        <div class="cpick"><label>Trim</label><input type="color" id="cTrim" value="#ffffff"></div>
+      </div>
+    </div>
+    <div class="ctl">
+      <div class="oplabel">Roster<span class="n">printed live on the mesh</span></div>
+      <div class="field">
+        <label>Team name (back)</label>
+        <input type="text" id="fName" maxlength="12" value="HANYU LIU">
+      </div>
+      <div class="field">
+        <label>Number (front + back)</label>
+        <input type="text" id="fNumber" maxlength="2" value="06" inputmode="numeric">
+      </div>
+    </div>
+    <div class="ctl">
+      <div class="oplabel">Why this exists</div>
+      <div class="field" style="margin-bottom:0">
+        <div class="cap" style="font-size:11px;color:var(--ink-dim);line-height:1.6;">
+          Every SKU on Vatica's site is a photoshoot. This mesh is <b style="color:var(--ink)">one asset</b> —
+          it becomes any colorway, any name, any number, at zero incremental cost.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat s-amber"><span class="n" id="statColorways">3</span>preset colorways, 0 photoshoots</div>
+    <div class="stat"><span class="n">1</span>mesh, infinite name/number combinations</div>
+    <div class="stat"><span class="n">¥0</span>marginal cost per new colorway</div>
+  </div>
+</div>
+
+<script type="module">
+import * as THREE from '../assets/three.module.min.js';
+
+/* ---------------------------------------------------------
+   GEOMETRY — a basketball-tank silhouette, extruded for a
+   sliver of real thickness, then wrapped around a vertical
+   cylinder (front panel = 0..180°, back panel = 180..360°).
+   Front/back share the same radius so their side seams meet
+   with no gap or overlap — one continuous torso, two panels.
+--------------------------------------------------------- */
+const R = 0.42;       // torso radius the flat panels get bent around
+const XMAX = 0.66;     // panel half-width -> XMAX/R = 90°, so two panels close a full circle
+const DEPTH = 0.035;   // extrude thickness
+
+function torsoOutline(shape, neckline){
+  shape.moveTo(-0.50, 1.05);
+  neckline(shape);                                   // draws from left shoulder to right shoulder
+  shape.quadraticCurveTo(0.66, 1.0, 0.66, 0.55);      // right armhole
+  shape.lineTo(0.66, -0.75);                          // right side
+  shape.quadraticCurveTo(0.66, -1.05, 0.40, -1.05);   // hem corner
+  shape.lineTo(-0.40, -1.05);                         // hem
+  shape.quadraticCurveTo(-0.66, -1.05, -0.66, -0.75); // hem corner
+  shape.lineTo(-0.66, 0.55);                          // left side
+  shape.quadraticCurveTo(-0.66, 1.0, -0.50, 1.05);    // left armhole
+  shape.closePath();
+}
+function frontShape(){
+  const s = new THREE.Shape();
+  torsoOutline(s, (sh)=>{ sh.lineTo(0, 0.62); sh.lineTo(0.50, 1.05); }); // V-neck
+  return s;
+}
+function backShape(){
+  const s = new THREE.Shape();
+  torsoOutline(s, (sh)=>{ sh.quadraticCurveTo(0, 0.86, 0.50, 1.05); }); // shallow crew neck
+  return s;
+}
+
+function makePanel(shape, thetaOffset, material){
+  const geo = new THREE.ExtrudeGeometry(shape, { depth: DEPTH, bevelEnabled:false, curveSegments:28, steps:1 });
+  geo.translate(0, 0, -DEPTH/2);
+  geo.computeBoundingBox();
+  const bb = geo.boundingBox;
+  const pos = geo.attributes.position;
+  const uv = geo.attributes.uv;
+  const spanX = (bb.max.x - bb.min.x) || 1, spanY = (bb.max.y - bb.min.y) || 1;
+
+  // Consistent UV from raw (x,y) — same mapping for both panels. (The back panel
+  // ends up horizontally mirrored to a viewer standing behind it, because it wraps
+  // the same direction of travel as the front past the 180° point; that's corrected
+  // by pre-mirroring what gets drawn onto the back canvas, not here.)
+  for (let i=0;i<pos.count;i++){
+    uv.setXY(i, (pos.getX(i)-bb.min.x)/spanX, (pos.getY(i)-bb.min.y)/spanY);
+  }
+  // bend the flat slab around the Y axis
+  for (let i=0;i<pos.count;i++){
+    const x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
+    const theta = thetaOffset + x / R;
+    const rad = R + z;
+    pos.setXYZ(i, Math.sin(theta)*rad, y, Math.cos(theta)*rad);
+  }
+  pos.needsUpdate = true; uv.needsUpdate = true;
+  geo.computeVertexNormals();
+  return new THREE.Mesh(geo, material);
+}
+
+/* ---------------------------------------------------------
+   TEXTURES — one canvas per panel, redrawn whenever the
+   user changes colorway, team name or number.
+--------------------------------------------------------- */
+const TEX_SIZE = 1024;
+function makeCanvasTexture(){
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = TEX_SIZE;
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return { canvas, ctx: canvas.getContext('2d'), tex };
+}
+const frontTex = makeCanvasTexture();
+const backTex  = makeCanvasTexture();
+
+function contrastColor(hex){
+  const n = parseInt(hex.slice(1),16);
+  const r=(n>>16)&255, g=(n>>8)&255, b=n&255;
+  const lum = (0.299*r+0.587*g+0.114*b)/255;
+  return lum > 0.55 ? '#141821' : '#ffffff';
+}
+
+function drawArcText(ctx, text, cx, cy, radius, spread, size, color){
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.font = `700 ${size}px "Arial Black", Arial, sans-serif`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = color;
+  const total = spread * (text.length-1);
+  for (let i=0;i<text.length;i++){
+    const angle = -total/2 + i*spread;
+    ctx.save();
+    ctx.rotate(angle);
+    ctx.translate(0, -radius);
+    ctx.fillText(text[i], 0, 0);
+    ctx.restore();
+  }
+  ctx.restore();
+}
+
+function paintPanel({ ctx, canvas }, { body, side, trim, isBack, name, number }){
+  const S = canvas.width;
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.clearRect(0,0,S,S);
+  // The back panel wraps the same direction of travel as the front past the
+  // 180° mark, which mirrors it for anyone standing behind the jersey — so we
+  // pre-mirror everything drawn here (name/number included) to cancel that out.
+  // base
+  ctx.fillStyle = body; ctx.fillRect(0,0,S,S);
+  // side panels (fade in from the outer edges — this is what reads as a "color-block" jersey)
+  const bandW = S*0.16;
+  let g = ctx.createLinearGradient(0,0,bandW,0);
+  g.addColorStop(0, side); g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g; ctx.fillRect(0,0,bandW,S);
+  g = ctx.createLinearGradient(S,0,S-bandW,0);
+  g.addColorStop(0, side); g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g; ctx.fillRect(S-bandW,0,bandW,S);
+  // collar trim (approximate — a band across the neckline region)
+  ctx.fillStyle = trim;
+  ctx.fillRect(0, S*0.855, S, S*0.028);
+  // hem trim
+  ctx.fillRect(0, S*0.045, S, S*0.018);
+
+  const ink = contrastColor(body);
+  if (isBack){
+    {
+      const nameStr = (name||'').toUpperCase().slice(0,12) || 'YOUR NAME';
+      const spread = Math.min(0.135, 1.55/Math.max(6,nameStr.length));
+      drawArcText(ctx, nameStr, S*0.5, S*0.60, S*0.42, spread, S*0.05, ink);
+    }
+    ctx.font = `800 ${S*0.30}px "Arial Black", Arial, sans-serif`;
+    ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillStyle=ink;
+    ctx.fillText((number||'0').padStart(2,'0').slice(-2), S*0.5, S*0.36);
+  } else {
+    ctx.font = `800 ${S*0.17}px "Arial Black", Arial, sans-serif`;
+    ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillStyle=ink;
+    ctx.fillText((number||'0').padStart(2,'0').slice(-2), S*0.5, S*0.42);
+    // small chest mark, opposite where a sponsor crest would sit
+    ctx.font = `700 ${S*0.05}px -apple-system,Arial,sans-serif`;
+    ctx.fillStyle = ink; ctx.textAlign='left';
+    ctx.fillText('VATICA', S*0.15, S*0.72);
+  }
+}
+
+/* ---------------------------------------------------------
+   SCENE
+--------------------------------------------------------- */
+const stage = document.getElementById('stage');
+const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+stage.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(26, 1, 0.1, 20);
+camera.position.set(0, -0.04, 5.15);
+
+scene.add(new THREE.AmbientLight(0xffffff, 0.72));
+const key = new THREE.DirectionalLight(0xffffff, 0.8); key.position.set(1.6, 1.6, 2.6); scene.add(key);
+const fill = new THREE.DirectionalLight(0xdfe6ff, 0.4); fill.position.set(-2.2, 0.6, -1.4); scene.add(fill);
+const rim = new THREE.DirectionalLight(0xffffff, 0.32); rim.position.set(-0.6, 1.2, -2.6); scene.add(rim);
+
+const jerseyGroup = new THREE.Group();
+scene.add(jerseyGroup);
+
+const frontMat = new THREE.MeshStandardMaterial({ map:frontTex.tex, roughness:0.82, metalness:0.0 });
+const backMat  = new THREE.MeshStandardMaterial({ map:backTex.tex,  roughness:0.82, metalness:0.0 });
+let frontMesh, backMesh;
+
+function buildMeshes(){
+  if (frontMesh) jerseyGroup.remove(frontMesh);
+  if (backMesh) jerseyGroup.remove(backMesh);
+  frontMesh = makePanel(frontShape(), 0, frontMat);
+  backMesh  = makePanel(backShape(), Math.PI, backMat);
+  jerseyGroup.add(frontMesh, backMesh);
+}
+buildMeshes();
+
+function resize(){
+  const w = stage.clientWidth, h = stage.clientHeight;
+  if (!w || !h) return;
+  renderer.setSize(w, h, false);
+  camera.aspect = w/h; camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize);
+resize();
+
+/* ---------------------------------------------------------
+   STATE + REPAINT
+--------------------------------------------------------- */
+const state = {
+  body:'#1a2233', side:'#d97706', trim:'#ffffff',
+  name:'HANYU LIU', number:'06'
+};
+function repaint(){
+  paintPanel(frontTex, { ...state, isBack:false });
+  paintPanel(backTex,  { ...state, isBack:true });
+  frontTex.tex.needsUpdate = true;
+  backTex.tex.needsUpdate = true;
+}
+repaint();
+
+/* ---------------------------------------------------------
+   COLORWAYS
+--------------------------------------------------------- */
+const PRESETS = [
+  { id:'blaze',  label:'BLAZE',  body:'#17181c', side:'#d2601f', trim:'#ffffff' },
+  { id:'volt',   label:'VOLT',   body:'#0b1f3a', side:'#63c93d', trim:'#ffffff' },
+  { id:'aurora', label:'AURORA', body:'#1b2a4a', side:'#1fb8a3', trim:'#ffffff' },
+  { id:'custom', label:'CUSTOM', custom:true },
+];
+const swatchesEl = document.getElementById('swatches');
+const customRow = document.getElementById('customRow');
+let activePreset = 'blaze';
+
+function renderSwatches(){
+  swatchesEl.innerHTML = '';
+  PRESETS.forEach(p=>{
+    const btn = document.createElement('button');
+    btn.className = 'sw-btn' + (p.id===activePreset ? ' on':'');
+    const c1 = p.custom ? state.body : p.body, c2 = p.custom ? state.side : p.side;
+    btn.innerHTML = `<span class="chip"><i style="background:${c1}"></i><i style="background:${c2}"></i></span><span class="lbl">${p.label}</span>`;
+    btn.addEventListener('click', ()=>{
+      activePreset = p.id;
+      if (!p.custom){ state.body=p.body; state.side=p.side; state.trim=p.trim; syncPickers(); }
+      customRow.classList.toggle('hidden', !p.custom);
+      renderSwatches(); repaint();
+    });
+    swatchesEl.appendChild(btn);
+  });
+}
+function syncPickers(){
+  document.getElementById('cBody').value = state.body;
+  document.getElementById('cSide').value = state.side;
+  document.getElementById('cTrim').value = state.trim;
+}
+renderSwatches(); syncPickers();
+
+document.getElementById('cBody').addEventListener('input', e=>{ state.body=e.target.value; repaint(); });
+document.getElementById('cSide').addEventListener('input', e=>{ state.side=e.target.value; repaint(); });
+document.getElementById('cTrim').addEventListener('input', e=>{ state.trim=e.target.value; repaint(); });
+document.getElementById('fName').addEventListener('input', e=>{ state.name=e.target.value; repaint(); });
+document.getElementById('fNumber').addEventListener('input', e=>{ state.number=e.target.value.replace(/\D/g,'').slice(0,2); repaint(); });
+
+/* ---------------------------------------------------------
+   DRAG-TO-ROTATE + IDLE TURNTABLE + FRONT/BACK SNAP
+--------------------------------------------------------- */
+let dragging=false, lastX=0, velocity=0, idleTimer=null, targetSnap=null;
+const degEl = document.getElementById('deg'), facingEl = document.getElementById('facing');
+const btnFront = document.getElementById('btnFront'), btnBack = document.getElementById('btnBack');
+
+function norm(rad){ let d = (rad*180/Math.PI) % 360; if (d<0) d+=360; return d; }
+function setSnapButtons(deg){
+  const nearFront = deg<45 || deg>315;
+  btnFront.classList.toggle('on', nearFront);
+  btnBack.classList.toggle('on', !nearFront && deg>135 && deg<225);
+}
+function updateReadout(){
+  const deg = norm(jerseyGroup.rotation.y);
+  degEl.textContent = String(Math.round(deg)).padStart(3,'0') + '°';
+  facingEl.textContent = deg<45||deg>315 ? 'FRONT' : (deg>135&&deg<225 ? 'BACK' : (deg<=135 ? 'SIDE →' : '← SIDE'));
+  setSnapButtons(deg);
+}
+
+function pointerDown(x){ dragging=true; lastX=x; velocity=0; targetSnap=null; stage.classList.add('dragging'); clearTimeout(idleTimer); }
+function pointerMove(x){
+  if (!dragging) return;
+  const dx = x - lastX; lastX = x;
+  const delta = dx * 0.012;
+  jerseyGroup.rotation.y += delta;
+  velocity = delta;
+}
+function pointerUp(){
+  dragging=false; stage.classList.remove('dragging');
+  idleTimer = setTimeout(()=>{ velocity = velocity===0 ? 0.0022 : velocity; }, 1400);
+}
+stage.addEventListener('mousedown', e=> pointerDown(e.clientX));
+window.addEventListener('mousemove', e=> pointerMove(e.clientX));
+window.addEventListener('mouseup', pointerUp);
+stage.addEventListener('touchstart', e=> pointerDown(e.touches[0].clientX), {passive:true});
+window.addEventListener('touchmove', e=> pointerMove(e.touches[0].clientX), {passive:true});
+window.addEventListener('touchend', pointerUp);
+
+btnFront.addEventListener('click', ()=>{ targetSnap = 0; });
+btnBack.addEventListener('click', ()=>{ targetSnap = Math.PI; });
+
+/* ---------------------------------------------------------
+   RENDER LOOP
+--------------------------------------------------------- */
+let last = performance.now();
+function frame(now){
+  const dt = Math.min(0.05, (now-last)/1000); last = now;
+  if (!dragging){
+    if (targetSnap !== null){
+      let cur = jerseyGroup.rotation.y;
+      let diff = ((targetSnap - cur + Math.PI*3) % (Math.PI*2)) - Math.PI;
+      jerseyGroup.rotation.y += diff * Math.min(1, dt*6);
+      if (Math.abs(diff) < 0.002) targetSnap = null;
+      velocity = 0;
+    } else {
+      velocity *= (1 - Math.min(1, dt*1.4));
+      jerseyGroup.rotation.y += velocity + 0.0011; // gentle perpetual turntable drift
+    }
+  }
+  updateReadout();
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+document.getElementById('loadtag').remove();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
