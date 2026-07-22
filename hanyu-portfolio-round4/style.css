@@ -1,0 +1,345 @@
+/* Cormorant — self-hosted, used only for the big HANYU / LIU wordmark */
+@font-face{
+  font-family:"Cormorant";
+  src:url("assets/fonts/cormorant-latin-700-normal.woff2") format("woff2");
+  font-weight:700; font-style:normal; font-display:swap;
+}
+
+/* Hanken Grotesk — self-hosted, used for all body/UI text site-wide */
+@font-face{
+  font-family:"Hanken Grotesk";
+  src:url("assets/fonts/hanken-grotesk-latin-400-normal.woff2") format("woff2");
+  font-weight:400; font-style:normal; font-display:swap;
+}
+@font-face{
+  font-family:"Hanken Grotesk";
+  src:url("assets/fonts/hanken-grotesk-latin-500-normal.woff2") format("woff2");
+  font-weight:500; font-style:normal; font-display:swap;
+}
+@font-face{
+  font-family:"Hanken Grotesk";
+  src:url("assets/fonts/hanken-grotesk-latin-600-normal.woff2") format("woff2");
+  font-weight:600; font-style:normal; font-display:swap;
+}
+@font-face{
+  font-family:"Hanken Grotesk";
+  src:url("assets/fonts/hanken-grotesk-latin-700-normal.woff2") format("woff2");
+  font-weight:700; font-style:normal; font-display:swap;
+}
+
+/* ===== Hanyu Liu — shared design tokens ===== */
+:root{
+  --bg:#ffffff; --panel:#ffffff; --ink:#1a2233; --dim:#6b7486; --faint:#9aa3b5;
+  --line:#e6e8ee; --amber:#d97706; --amber-soft:#fef3e2; --red:#dc2626; --teal:#0d9488;
+  --violet:#7c5cff; --code:#f4f5f7; --mat:#f4f5f7; --mat-soft:#f9f9fb;
+  --gutter:clamp(24px,3.2vw,56px);
+}
+*{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"Hanken Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+a{ color:inherit; }
+img{ max-width:100%; display:block; }
+
+/* progressive-enhancement page transition (Chrome/Edge; no-ops elsewhere) */
+@view-transition{ navigation:auto; }
+::view-transition-old(root), ::view-transition-new(root){ animation-duration:.32s; }
+
+/* scroll-reveal (site.js adds .in when an element enters the viewport) */
+.reveal{ opacity:0; transform:translateY(16px); transition:opacity .6s ease, transform .6s ease; }
+.reveal.in{ opacity:1; transform:none; }
+
+/* full-bleed containers — fixed gutters, no centered max-width, so the
+   page fills wide monitors edge-to-edge instead of floating in a column */
+.wrap{ padding:0 var(--gutter); }
+.wrap-narrow{ max-width:760px; padding:0 var(--gutter); }
+
+/* =========================================================
+   STICKY COMPACT BAR — the big H / L mark, shrunk down but held
+   in the SAME two columns (H at the left gutter, L where the
+   big mark's second letter sits) so it reads as one continuous
+   shrink, not a swap to a different lockup. Hover either letter
+   to reveal "Hanyu Liu" as a native tooltip. Toggled by site.js
+   (.scrolled on body).
+   ========================================================= */
+.stickybar{
+  position:fixed; top:0; left:0; right:0; z-index:80;
+  display:grid; grid-template-columns:repeat(4,1fr); column-gap:16px; align-items:center;
+  padding:14px var(--gutter); background:rgba(255,255,255,.88); backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+  transform:translateY(-100%); opacity:0;
+  transition:transform .28s ease, opacity .28s ease;
+}
+body.scrolled .stickybar{ transform:translateY(0); opacity:1; }
+.stickybar .sb-h, .stickybar .sb-l{
+  display:flex; align-items:center; gap:9px;
+  font-size:14px; font-weight:650; letter-spacing:-0.01em; color:var(--ink); line-height:1;
+  text-decoration:none; justify-self:start;
+}
+.stickybar .sb-logo{
+  width:30px; height:30px; border-radius:50%; background:var(--ink); color:#fff; flex:0 0 auto;
+  display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800;
+}
+.stickybar .sb-hanzi{ font-weight:600; }
+.stickybar .sb-l{ grid-column:3; }
+.stickybar nav{ grid-column:2; display:flex; align-items:center; gap:22px; }
+.stickybar nav a{ font-size:13px; color:var(--dim); text-decoration:none; font-weight:500; }
+.stickybar nav a:hover{ color:var(--ink); }
+.stickybar nav a.active{ color:var(--ink); font-weight:650; }
+@media (max-width:760px){
+  .stickybar{ padding:10px 18px; grid-template-columns:repeat(2,1fr); row-gap:8px; }
+  .stickybar .sb-l{ grid-column:2; }
+  .stickybar nav{ grid-column:1/-1; gap:16px; }
+}
+
+/* =========================================================
+   SITEHEAD — big split wordmark + hairline info bar
+   shared across every page
+   ========================================================= */
+.sitehead{ padding:26px var(--gutter) 0; }
+.sitehead a{ text-decoration:none; }
+
+.cols4{ display:grid; grid-template-columns:repeat(4,1fr); column-gap:16px; }
+
+.mark{ align-items:end; padding-bottom:6px; position:relative; }
+.mark span, .mark a.m1, .mark a.m2{
+  display:block; font-family:"Cormorant",Georgia,serif; font-size:clamp(72px,10.4vw,178px);
+  font-weight:700; letter-spacing:-0.01em;
+  line-height:.82; color:var(--ink); text-decoration:none;
+}
+.mark .m1{ grid-column:1/3; }
+.mark .m2{ grid-column:3/5; }
+
+/* nav lives inline with the big mark now, tucked in the empty space
+   to the right of the (short) second word, top-aligned */
+.mark .marknav{
+  position:absolute; top:2px; right:0; display:flex; gap:22px;
+  font-family:"Hanken Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+}
+.mark .marknav a{ font-size:13px; color:var(--dim); font-weight:500; text-decoration:none; }
+.mark .marknav a:hover{ color:var(--ink); }
+.mark .marknav a.active{ color:var(--ink); font-weight:650; }
+
+/* generic status dot, reused outside the header bar too (e.g. about page) */
+.dot{ width:7px; height:7px; border-radius:50%; background:var(--teal); flex:0 0 auto; display:inline-block;
+  vertical-align:middle; box-shadow:0 0 0 3px rgba(13,148,136,.15); animation:pulse 2.4s ease-in-out infinite; }
+@keyframes pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.45; } }
+
+.hbar{
+  padding:14px 0 13px; border-top:1px solid var(--line);
+  font-size:12.5px; color:var(--dim);
+}
+.hbar .hb{ line-height:1.5; }
+.hbar .hb.bio{ grid-column:1/4; font-size:13px; line-height:1.65; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.hbar .hb.bio b{ color:var(--ink); }
+.hbar .hb.status{ display:flex; align-items:center; gap:7px; grid-column:4; justify-content:flex-end; }
+
+@media (max-width:760px){
+  .sitehead{ padding:20px 18px 0; }
+  .cols4{ grid-template-columns:repeat(2,1fr); row-gap:10px; }
+  .mark span, .mark a.m1, .mark a.m2{ font-size:clamp(40px,16vw,84px); }
+  .mark .m1{ grid-column:1/-1; }
+  .mark .m2{ grid-column:1/-1; margin-top:4px; }
+  .mark .marknav{ position:static; margin-top:12px; gap:16px; }
+  .hbar{ padding:12px 0; }
+  .hbar .hb.bio{ grid-column:1/-1; max-width:none; white-space:normal; }
+  .hbar .hb.status{ grid-column:1/-1; justify-content:flex-start; margin-top:8px; }
+}
+
+footer.sitefoot{ padding:56px 0 72px; font-size:13px; color:var(--faint); text-align:center; }
+footer.sitefoot a{ color:var(--dim); text-decoration:none; }
+
+/* =========================================================
+   PROJECT GRID (index.html) — full-bleed N-across card grid
+   ========================================================= */
+.pgrid{
+  display:grid; grid-template-columns:repeat(4,1fr); column-gap:20px; row-gap:36px;
+  padding:100px 0 10px;
+}
+.pcard{ border-top:1px solid var(--line); padding-top:16px; }
+.pcard .phead{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:13px; gap:10px; }
+.pcard .phead .pt{ font-size:13.5px; font-weight:400; color:var(--ink); line-height:1.3; }
+.pcard .phead .pc{ font-size:11px; color:var(--dim); margin-top:2px; }
+.pcard .phead .pid{ font-size:12px; color:var(--faint); font-variant-numeric:tabular-nums; flex:0 0 auto; }
+
+.ptile{
+  display:block; text-decoration:none; color:inherit; position:relative;
+  background:var(--mat); border-radius:6px; overflow:hidden;
+  padding:72px 72px 0;
+  transition:box-shadow .3s ease;
+}
+.ptile:hover{ box-shadow:inset 0 0 0 1px var(--line); }
+.ptile .pmedia{
+  min-height:170px; aspect-ratio:4/4.9; overflow:hidden; position:relative;
+  border-radius:0; box-shadow:0 0 0 6px #fff;
+  transition:transform .5s cubic-bezier(.2,.8,.2,1);
+}
+.ptile.slot .pmedia{ box-shadow:none; }
+.ptile:hover .pmedia{ transform:scale(1.02); }
+.ptile .pmedia img{ width:100%; height:100%; object-fit:cover; display:block; }
+
+/* placeholder projects without real screenshots yet — same size/position as
+   a real photo poster (fills .pmedia edge to edge, cropped at the bottom by
+   the same fixed aspect-ratio box), with a flat 3D-offset drop shadow
+   instead of the white ring used for real photos/demos */
+.ptile .pmedia.swatch{
+  box-shadow:10px 10px 0 rgba(26,34,51,0.10);
+  transition:transform .3s ease, box-shadow .3s ease;
+}
+.ptile:hover .pmedia.swatch{
+  transform:translate(-3px,-3px) !important;
+  box-shadow:13px 13px 0 rgba(26,34,51,0.13);
+}
+
+/* placeholder palette — brighter, cleaner, higher-contrast tones (avoiding
+   the earlier muddy/desaturated earth tones); still mixes warm and cool so
+   no two similar hues land in the same homepage row */
+.sw-slate{ background:#1e2340; }  /* clean deep navy */
+.sw-stone{ background:#d1602f; }  /* bright warm rust-orange */
+.sw-clay{  background:#c9503f; }
+.sw-teal{  background:#2f8f65; }  /* clean saturated emerald green */
+.sw-ink{   background:#181c24; }
+.sw-sand{  background:#c9a468; }  /* brighter warm gold-tan */
+.sw-cream{ background:#e9e4d8; }
+
+/* Malin+Goetz-style label poster — real project preview copy laid directly
+   on a muted, sophisticated color field, no boxes/cards around the text,
+   just a type hierarchy (brand mark → tagline → description → fine print
+   → a bold closing stat), same framing (white ring) as a real photo tile */
+.pmedia.plabel{
+  display:flex; flex-direction:column; color:#fff; text-align:left;
+  padding:24px 22px 20px;
+}
+.pmedia.plabel .pl-top{ margin-bottom:18px; }
+.pmedia.plabel .pl-brand{
+  font-family:"Cormorant",Georgia,serif; font-weight:700; letter-spacing:-0.01em;
+  font-size:clamp(26px,2.6vw,36px); line-height:1;
+}
+.pmedia.plabel .pl-sub{ font-size:14px; font-weight:400; margin-top:4px; opacity:.92; }
+.pmedia.plabel .pl-desc{ font-size:11.5px; line-height:1.65; max-width:90%; opacity:.94; }
+.pmedia.plabel .pl-meta{
+  font-size:9px; line-height:1.7; letter-spacing:.03em; opacity:.72;
+  margin-top:auto; padding-top:18px;
+}
+.pmedia.plabel .pl-stat{ font-size:15.5px; font-weight:700; margin-top:8px; }
+.pmedia.plabel .pl-stat span{ font-weight:400; font-size:10.5px; opacity:.85; }
+.pl-pocoo{ background:#7d8f6e; }
+.pl-vatica{ background:#b97b6a; }
+
+/* homepage-only poster/collage tile — several real photos combined into one
+   card image. Detail pages never use this; they lead with the live demo. */
+.poster{ display:grid; grid-template-rows:1fr .58fr; gap:3px; width:100%; height:100%; }
+.poster .p-main, .poster .p-cell{ overflow:hidden; }
+.poster .p-strip{ display:grid; grid-template-columns:1fr 1fr; gap:3px; }
+.poster img{ width:100%; height:100%; object-fit:cover; display:block; }
+
+.ptile.slot{ border:1px dashed var(--line); background:transparent; }
+.ptile.slot .pmedia{ display:flex; align-items:center; justify-content:center;
+  color:var(--faint); font-size:12px; text-align:center; padding:14px; }
+.ptile.slot:hover{ box-shadow:none; }
+
+@media (max-width:980px){ .pgrid{ grid-template-columns:repeat(2,1fr); } }
+@media (max-width:560px){ .pgrid{ grid-template-columns:1fr; row-gap:30px; } }
+
+/* =========================================================
+   PROJECT DETAIL — sticky media rail (left) + scrolling
+   gray text column (right): metadata + full case narrative
+   ========================================================= */
+.pdethead{ padding:8px var(--gutter) 0; }
+.pdethead .back{ font-size:12px; color:var(--faint); text-decoration:none; }
+.pdethead .back:hover{ color:var(--dim); }
+
+.pdcase{
+  /* golden-ratio split — media column is the 0.618 major, text rail the 0.382
+     minor, mirroring the Vibe Coding item panel (whose text rail is the minor
+     share of the *other* side) at the same proportions */
+  margin:18px 0 0; background:#fff;
+  display:grid; grid-template-columns:61.8% 38.2%; align-items:start;
+}
+.pdcase .pdmedia-col{
+  display:flex; flex-direction:column; gap:18px; padding:32px 34px 40px var(--gutter);
+  position:sticky; top:26px; background:#fff;
+}
+.pdcase .pdmedia-col img, .pdcase .pdmedia-col iframe{
+  width:94%; margin:0 auto; border-radius:0; border:1px solid var(--line); display:block; background:#fff;
+}
+.pdcase .pdmedia-col iframe{ aspect-ratio:16/9.4; }
+.pdcase .pdmedia-col .cap{ font-size:12px; color:var(--faint); margin-top:-8px; line-height:1.5; width:94%; margin-left:auto; margin-right:auto; }
+.pdcase .pdmedia-col .cap b{ color:var(--dim); font-weight:600; }
+
+.pdcase .pdtext-col{
+  position:relative; padding:32px var(--gutter) 70px 34px; min-height:100vh;
+  border-left:1px solid var(--line); background:#fff;
+}
+.pdcase .back-icon{
+  position:absolute; top:28px; right:var(--gutter);
+  width:36px; height:36px; border-radius:50%; border:1px solid var(--line);
+  background:#fff; display:flex; align-items:center; justify-content:center;
+  color:var(--dim); text-decoration:none; transition:background .2s ease, color .2s ease, transform .2s ease;
+}
+.pdcase .back-icon svg{ width:16px; height:16px; }
+.pdcase .back-icon:hover{ background:var(--ink); color:#fff; transform:translateY(-1px); }
+.pdcase .pdtitle{ font-size:17px; font-weight:650; }
+.pdcase .pdtype{ font-size:12px; color:var(--dim); margin-top:2px; margin-bottom:4px; }
+
+.pdrow{ display:flex; justify-content:space-between; gap:16px; padding:11px 0; border-top:1px solid var(--line);
+  font-size:12.5px; }
+.pdrow:first-of-type{ margin-top:14px; }
+.pdrow .k{ color:var(--faint); flex:0 0 auto; }
+.pdrow .v{ color:var(--dim); text-align:right; }
+.pdrow .v.list{ text-align:right; }
+.pdrow .v.list div{ margin-bottom:2px; }
+.pdrow .v a{ color:var(--amber); font-weight:600; text-decoration:none; }
+.pdrow .v a:hover{ text-decoration:underline; }
+
+@media (max-width:860px){
+  .pdcase{ grid-template-columns:1fr; }
+  .pdcase .pdmedia-col{ position:static; padding:24px 18px 20px; }
+  .pdcase .pdtext-col{ padding:20px 18px 50px; min-height:0; border-left:none; border-top:1px solid var(--line); }
+  .pdcase .back-icon{ top:16px; right:16px; }
+}
+
+/* =========================================================
+   ABOUT — left metadata column + right bio column (about.html)
+   ========================================================= */
+.about-split{
+  display:grid; grid-template-columns:1fr 1fr; column-gap:80px;
+  padding:100px 0 100px;
+}
+.about-split .am-col .am-fields{
+  display:flex; flex-wrap:wrap; gap:40px; border-top:1px solid var(--line); padding-top:16px; margin-bottom:36px;
+}
+.about-split .am-col .am-field{ font-size:12.5px; }
+.about-split .am-col .k{ color:var(--faint); margin-bottom:5px; }
+.about-split .am-col .v{ color:var(--ink); font-weight:500; line-height:1.6; }
+.about-split .am-col .v a{ color:var(--ink); text-decoration:none; }
+.about-split .am-col .v a:hover{ text-decoration:underline; }
+.about-split .am-col .v .dot{ margin-right:6px; }
+
+.about-split .ab-col{ max-width:640px; border-top:1px solid var(--line); padding-top:16px; }
+.about-split .am-col .portrait{
+  width:100%; max-width:220px; aspect-ratio:3/4; border-radius:10px; overflow:hidden;
+  border:1px solid var(--line); background:linear-gradient(135deg,#1a2233,#2c3850);
+  display:flex; align-items:center; justify-content:center;
+}
+.about-split .am-col .portrait img{ width:100%; height:100%; object-fit:cover; }
+.about-split .am-col .portrait .mono{ color:#fff; font-size:28px; font-weight:650; letter-spacing:.04em; }
+.about-split .ab-col .lead{ font-size:19px; line-height:1.6; color:var(--ink); font-weight:500; margin:0 0 22px; }
+.about-split .ab-col .sub{ font-size:13.5px; line-height:1.75; color:var(--dim); margin:0 0 30px; }
+.about-split .ablinks{ display:flex; flex-wrap:wrap; gap:26px; }
+.about-split .ablinks a{
+  font-size:13.5px; font-weight:600; color:var(--dim); text-decoration:none;
+  transition:color .2s ease;
+}
+.about-split .ablinks a:hover{ color:var(--ink); }
+.about-split .sig{ margin-top:34px; padding-top:18px; border-top:1px solid var(--line); font-size:12px; color:var(--faint); line-height:1.8; }
+
+@media (max-width:860px){
+  .about-split{ grid-template-columns:1fr; row-gap:30px; padding:30px 0 70px; }
+}
+
+/* view-transition names — give matching grid tile + detail hero the same name to morph between them */
+.vt-vatica{ view-transition-name:vt-vatica; }

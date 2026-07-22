@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Priced In — Antifragility &amp; the Black Swan Ledger</title>
+<style>
+  :root{
+    --bg:#ffffff;
+    --panel:#ffffff;
+    --ink:#1a2233;
+    --ink-dim:#6b7486;
+    --ink-faint:#9aa3b5;
+    --line:#e6e8ee;
+    --idle:#c3c8d4;
+    --amber:#d97706;
+    --amber-soft:rgba(217,119,6,0.08);
+    --red:#dc2626;
+    --teal:#0d9488;
+    --code-bg:#f4f5f7;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; height:100%; background:var(--bg); overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Helvetica,Arial,sans-serif;
+    color:var(--ink); }
+  #wrap{ display:flex; flex-direction:column; height:100vh; padding:26px 34px 20px; gap:0; }
+
+  header{ display:flex; justify-content:space-between; align-items:flex-start; flex:0 0 auto; }
+  .kicker{ font-size:10.5px; letter-spacing:.26em; color:var(--ink-faint); text-transform:uppercase; margin-bottom:7px; }
+  h1{ margin:0 0 5px; font-size:21px; font-weight:650; letter-spacing:-0.01em; }
+  .sub{ font-size:13px; color:var(--ink-dim); max-width:580px; line-height:1.55; }
+  .sub b{ color:var(--ink); font-weight:600; }
+
+  .legend{ display:flex; flex-direction:column; gap:7px; padding-top:6px; }
+  .lg{ display:flex; align-items:center; gap:8px; font-size:12px; color:var(--ink-dim); white-space:nowrap; }
+  .lg .d{ width:9px; height:9px; border-radius:50%; flex:0 0 auto; }
+
+  #fieldbox{ position:relative; flex:1 1 auto; min-height:0; margin:14px 0 10px; }
+  canvas{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+
+  .codestrip{
+    flex:0 0 auto; display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    font-family:"SF Mono",SFMono-Regular,Menlo,Consolas,monospace; font-size:11.5px;
+    color:var(--ink-dim); margin-bottom:14px;
+  }
+  .codestrip .chip{ background:var(--code-bg); border:1px solid var(--line); border-radius:6px; padding:5px 10px; }
+  .codestrip .chip em{ font-style:normal; color:var(--amber); font-weight:600; }
+  .codestrip .arrow{ color:var(--ink-faint); }
+  .codestrip .src{ margin-left:auto; font-family:inherit; font-size:10.5px; color:var(--ink-faint); }
+
+  .controls{ flex:0 0 auto; display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+  .ctl{ background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:12px 14px 11px; }
+  .ctl .row1{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:2px; }
+  .ctl .pname{ font-family:"SF Mono",Menlo,Consolas,monospace; font-size:10.5px; color:var(--ink-faint); letter-spacing:.02em; }
+  .ctl .pval{ font-family:"SF Mono",Menlo,Consolas,monospace; font-size:12px; font-weight:600; }
+  .ctl .oplabel{ font-size:12.5px; font-weight:600; margin-bottom:7px; }
+  .ctl input[type=range]{ width:100%; margin:0 0 7px; accent-color:var(--ink); height:18px; }
+  .ctl .consequence{ font-size:11px; line-height:1.5; color:var(--ink-dim); min-height:2.9em; }
+  .ctl.c-amber .pval{ color:var(--amber); } .ctl.c-amber input{ accent-color:var(--amber); }
+  .ctl.c-red .pval{ color:var(--red); }   .ctl.c-red input{ accent-color:var(--red); }
+  .ctl.c-teal .pval{ color:var(--teal); } .ctl.c-teal input{ accent-color:var(--teal); }
+  .ctl.c-ink .pval{ color:var(--ink); }
+
+  .stats{ display:flex; gap:22px; align-items:baseline; padding-top:10px; flex-wrap:wrap; }
+  .stat{ display:flex; align-items:baseline; gap:6px; font-size:12px; color:var(--ink-dim); }
+  .stat .n{ font-size:15px; font-weight:650; color:var(--ink); font-variant-numeric:tabular-nums; min-width:2ch; }
+  .stat.s-amber .n{ color:var(--amber); } .stat.s-teal .n{ color:var(--teal); } .stat.s-red .n{ color:var(--red); }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <header>
+    <div>
+      <div class="kicker">Vibe Coding — Systems Thinking · Antifragility</div>
+      <h1>Priced in — the black swan ledger</h1>
+      <div class="sub">Every gray tick is an ordinary day — already <b>priced in</b>, no edge either way.
+        Time flows left. Every so often the field throws a <b>rare, oversized event</b> —
+        watch how much of the cumulative line it alone is responsible for.</div>
+    </div>
+    <div class="legend">
+      <div class="lg"><span class="d" style="background:var(--idle)"></span>Ordinary day — priced in, ~zero edge</div>
+      <div class="lg"><span class="d" style="background:var(--amber)"></span>Black swan — rare, outsized, convex payoff</div>
+      <div class="lg"><span class="d" style="background:var(--teal)"></span>Cumulative return — the running ledger</div>
+    </div>
+  </header>
+
+  <div id="fieldbox"><canvas id="c"></canvas></div>
+
+  <div class="codestrip">
+    <span class="chip">daily = noise(<em id="cNoise">±0.4%</em>)</span>
+    <span class="arrow">→</span>
+    <span class="chip">swan = random(<em id="cFreq">~1/90d</em>) × payoff(<em id="cPayoff">×18</em>)</span>
+    <span class="arrow">→</span>
+    <span class="chip">ledger += daily · exposure + swan · exposure</span>
+    <span class="src">the entire model — three lines, no forecasting</span>
+  </div>
+
+  <div class="controls">
+    <div class="ctl c-ink">
+      <div class="row1"><span class="pname">NOISE · daily variance</span><span class="pval" id="vNoise">0.4%</span></div>
+      <div class="oplabel">Priced-in daily noise</div>
+      <input type="range" id="sNoise" min="0.1" max="1.2" step="0.05" value="0.4">
+      <div class="consequence" id="qNoise"></div>
+    </div>
+    <div class="ctl c-amber">
+      <div class="row1"><span class="pname">FREQ · swans per 90d</span><span class="pval" id="vFreq">1</span></div>
+      <div class="oplabel">Black swan frequency</div>
+      <input type="range" id="sFreq" min="0.2" max="4" step="0.1" value="1">
+      <div class="consequence" id="qFreq"></div>
+    </div>
+    <div class="ctl c-red">
+      <div class="row1"><span class="pname">PAYOFF · swan multiplier</span><span class="pval" id="vPayoff">×18</span></div>
+      <div class="oplabel">Convexity of the payoff</div>
+      <input type="range" id="sPayoff" min="2" max="40" step="1" value="18">
+      <div class="consequence" id="qPayoff"></div>
+    </div>
+    <div class="ctl c-teal">
+      <div class="row1"><span class="pname">EXPOSURE · staying in the game</span><span class="pval" id="vExp">100%</span></div>
+      <div class="oplabel">Exposure to the field</div>
+      <input type="range" id="sExp" min="0" max="100" step="5" value="100">
+      <div class="consequence" id="qExp"></div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><span class="n" id="nDays">0</span>days observed</div>
+    <div class="stat s-amber"><span class="n" id="nSwans">0</span>black swans hit</div>
+    <div class="stat s-teal"><span class="n" id="nLedger">0.0%</span>cumulative return</div>
+    <div class="stat s-red"><span class="n" id="nShare">0%</span>of return from black swans</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d');
+  const box = document.getElementById('fieldbox');
+
+  const P = { noise:0.4, freq:1, payoff:18, exp:100 };
+
+  const DAY_WINDOW = 50;     // total days visible across the width
+  const SEED_DAYS = 46;      // days of history pre-simulated before "today"
+  let W=0, H=0, dpr=1, midY=0, pxDay=0, todayX=0;
+
+  function resize(){
+    dpr = Math.min(window.devicePixelRatio||1, 2);
+    W = box.clientWidth; H = box.clientHeight;
+    canvas.width = W*dpr; canvas.height = H*dpr;
+    canvas.style.width=W+'px'; canvas.style.height=H+'px';
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    midY = H*0.62;
+    pxDay = W/DAY_WINDOW;
+    todayX = SEED_DAYS*pxDay;
+  }
+  resize(); window.addEventListener('resize', resize);
+
+  // ---- ledger state ----
+  // events/ledgerHistory are positioned relative to the continuously advancing
+  // `nowDay` clock (see frame loop below) — NOT to a fixed absolute window —
+  // so the field scrolls smoothly forever instead of running off the right edge.
+  let events = [];      // {day, mag, swan:bool}
+  let ledgerFromNoise = 0, ledgerFromSwans = 0, swanCount = 0, dayCount = 0;
+  let ledgerHistory = []; // {day, cum}
+
+  function stepDay(day){
+    dayCount++;
+    const noiseMag = (Math.random()*2-1) * P.noise;   // ± noise%, ~zero mean, priced in
+    let isSwan = Math.random() < (P.freq/90);
+    let mag = noiseMag;
+    if (isSwan){
+      swanCount++;
+      mag = P.noise * P.payoff * (0.6+Math.random()*0.8); // always positive — the convex win
+    }
+    const applied = mag * (P.exp/100);
+    if (isSwan) ledgerFromSwans += applied; else ledgerFromNoise += applied;
+    events.push({ day, mag, swan: isSwan });
+    const cum = ledgerFromNoise + ledgerFromSwans;
+    ledgerHistory.push({ day, cum });
+    if (ledgerHistory.length > 600) ledgerHistory.shift();
+    if (events.length > 600) events.shift();
+  }
+  for (let d=-SEED_DAYS; d<=0; d++) stepDay(d);
+  let nowDay = 0, lastWholeDay = 0;
+
+  // ---- copy ----
+  const q = id=>document.getElementById(id);
+  function updateCopy(){
+    q('vNoise').textContent = P.noise.toFixed(2)+'%';
+    q('cNoise').textContent = '±'+P.noise.toFixed(1)+'%';
+    q('qNoise').textContent =
+      P.noise<0.4 ? 'A tight, efficient market — ordinary days carry almost no signal.' :
+      P.noise<0.8 ? 'Some day-to-day churn, but still no durable edge from the daily grind.' :
+                    'Noisy days — easy to mistake for signal, but it still nets to nothing.';
+    q('vFreq').textContent = P.freq.toFixed(1);
+    q('cFreq').textContent = '~1/'+Math.round(90/P.freq)+'d';
+    q('qFreq').textContent =
+      P.freq<0.6 ? 'Rare. Most of the timeline is silence — the whole thesis rides on a handful of days.' :
+      P.freq<2   ? 'Occasional — often enough to matter, rare enough to be dismissed as luck.' :
+                   'Frequent enough that skeptics start calling it "the new normal" — right before it isn’t.';
+    q('vPayoff').textContent = '×'+P.payoff;
+    q('cPayoff').textContent = '×'+P.payoff;
+    q('qPayoff').textContent =
+      P.payoff<8  ? 'Mild convexity — the tail helps, but daily noise still competes for credit.' :
+      P.payoff<22 ? 'Strongly convex — one good day outweighs months of ordinary ones.' :
+                    'Extreme convexity — nearly the entire ledger is written by days you couldn’t have scheduled.';
+    q('vExp').textContent = P.exp+'%';
+    q('qExp').textContent =
+      P.exp<30  ? 'Mostly on the sidelines — you dodge the noise, but you also miss the swan.' :
+      P.exp<80  ? 'Partially in the game — some optionality captured, some left on the table.' :
+                  'Fully exposed — antifragility only pays out if you’re still there when it arrives.';
+  }
+  const bind=(id,key,parse)=>{ const el=q(id); el.addEventListener('input',()=>{ P[key]=parse(el.value); updateCopy(); }); };
+  bind('sNoise','noise',v=>+v); bind('sFreq','freq',v=>+v); bind('sPayoff','payoff',v=>+v); bind('sExp','exp',v=>+v);
+  updateCopy();
+
+  function updateStats(){
+    q('nDays').textContent = dayCount;
+    q('nSwans').textContent = swanCount;
+    const cum = ledgerFromNoise + ledgerFromSwans;
+    q('nLedger').textContent = (cum>=0?'+':'')+cum.toFixed(1)+'%';
+    const total = Math.abs(ledgerFromNoise) + Math.abs(ledgerFromSwans);
+    const share = total>0.001 ? Math.round(100*Math.abs(ledgerFromSwans)/total) : 0;
+    q('nShare').textContent = share+'%';
+  }
+
+  // ---- sim / draw ----
+  let acc = 0, last = performance.now();
+  const DAYS_PER_SEC = 6;
+
+  function draw(t){
+    ctx.clearRect(0,0,W,H);
+
+    // baseline (zero line)
+    ctx.strokeStyle='rgba(26,34,51,0.10)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(0,midY); ctx.lineTo(W,midY); ctx.stroke();
+    ctx.fillStyle='rgba(154,163,181,0.9)';
+    ctx.font='10.5px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+    ctx.fillText('priced in — zero edge', 8, midY-8);
+
+    // TODAY line
+    ctx.strokeStyle='rgba(26,34,51,0.8)'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(todayX, 12); ctx.lineTo(todayX, H-46); ctx.stroke();
+    ctx.fillStyle='rgba(26,34,51,0.9)';
+    ctx.font='650 10.5px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+    ctx.fillText('TODAY', todayX-40, 24);
+
+    // events — positioned by distance from the continuously advancing "now", so
+    // they drift smoothly leftward and the field never runs out of room
+    const scaleY = (H*0.34) / 20; // px per % magnitude
+    for (let i=0;i<events.length;i++){
+      const e = events[i];
+      const x = todayX - (nowDay-e.day)*pxDay;
+      if (x<-20||x>W+20) continue;
+      if (e.swan){
+        const h = Math.min(H*0.42, e.mag*scaleY);
+        const grad = ctx.createLinearGradient(0, midY-h, 0, midY);
+        grad.addColorStop(0,'rgba(217,119,6,0.85)');
+        grad.addColorStop(1,'rgba(217,119,6,0.15)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(x-2.5, midY-h, 5, h);
+        ctx.save();
+        ctx.shadowBlur=14; ctx.shadowColor='rgba(217,119,6,0.55)';
+        ctx.beginPath(); ctx.arc(x, midY-h, 4.5, 0, Math.PI*2);
+        ctx.fillStyle='rgba(217,119,6,0.95)'; ctx.fill();
+        ctx.restore();
+      } else {
+        const h = Math.max(1.2, Math.abs(e.mag)*scaleY*0.9);
+        const up = e.mag>=0;
+        ctx.fillStyle='rgba(163,168,184,0.55)';
+        ctx.fillRect(x-1, up?midY-h:midY, 2, h);
+      }
+    }
+
+    // cumulative ledger line
+    if (ledgerHistory.length>1){
+      const maxAbs = Math.max(10, ...ledgerHistory.map(p=>Math.abs(p.cum)));
+      const lh = H*0.20;
+      const baseY = H-24;
+      ctx.beginPath();
+      let started = false;
+      for (let i=0;i<ledgerHistory.length;i++){
+        const pt = ledgerHistory[i];
+        const x = todayX - (nowDay-pt.day)*pxDay;
+        if (x<-30) continue;
+        const y = baseY - (pt.cum/maxAbs)*lh;
+        if (!started){ ctx.moveTo(x,y); started = true; } else ctx.lineTo(x,y);
+      }
+      ctx.strokeStyle='rgba(13,148,136,0.85)'; ctx.lineWidth=1.8; ctx.stroke();
+      ctx.fillStyle='rgba(13,148,136,0.9)';
+      ctx.font='600 10.5px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+      ctx.fillText('cumulative ledger', 8, baseY-lh-6);
+    }
+  }
+
+  function frame(now){
+    const dt = Math.min(0.1,(now-last)/1000); last = now;
+    nowDay += dt*DAYS_PER_SEC;
+    const wholeNow = Math.floor(nowDay);
+    while (lastWholeDay < wholeNow){ lastWholeDay++; stepDay(lastWholeDay); }
+    draw(now/1000);
+    updateStats();
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

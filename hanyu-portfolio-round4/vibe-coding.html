@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vibe Coding — Hanyu Liu</title>
+<meta name="view-transition" content="same-origin">
+<link rel="stylesheet" href="style.css">
+<script src="site.js" defer></script>
+<style>
+  /* ---------- landing: plain intro + a playful bento grid, same spirit as
+     the Work grid but livelier — varied card sizes instead of a uniform row ---------- */
+  header.vintro{ padding:44px 0 4px; }
+  header.vintro h1{ font-size:28px; font-weight:680; letter-spacing:-0.02em; margin:0 0 10px; }
+  header.vintro p{ font-size:14px; color:var(--dim); max-width:600px; line-height:1.65; margin:0; }
+  header.vintro p b{ color:var(--ink); }
+
+  .chips{ display:flex; gap:8px; flex-wrap:wrap; padding:22px 0 8px; }
+  .chip{
+    font-size:12.5px; font-weight:600; color:var(--dim); background:var(--panel);
+    border:1px solid var(--line); border-radius:100px; padding:7px 15px; cursor:pointer;
+    transition:all .18s ease; user-select:none;
+  }
+  .chip:hover{ color:var(--ink); }
+  .chip.on{ background:var(--ink); color:#fff; border-color:var(--ink); }
+
+  /* bento grid — explicit spans (not named areas) + auto-flow:dense, so
+     filtering out a card lets the rest repack instead of leaving a hole */
+  .vgrid{
+    display:grid; grid-template-columns:repeat(4,1fr); grid-auto-rows:220px; grid-auto-flow:dense;
+    gap:18px; padding:16px 0 20px;
+  }
+  .vcard{
+    border-radius:14px; overflow:hidden; border:1px solid var(--line); background:var(--panel);
+    cursor:pointer; position:relative; display:flex; flex-direction:column;
+    transition:transform .25s ease, box-shadow .25s ease;
+  }
+  .vcard:hover{ transform:translateY(-4px); box-shadow:0 16px 36px rgba(26,34,51,0.12); }
+  .vcard.hidden{ display:none; }
+  .vcard.sz-big{ grid-column:span 2; grid-row:span 2; }
+  .vcard.sz-wide{ grid-column:span 2; grid-row:span 1; }
+  .vcard.sz-med, .vcard.sz-small{ grid-column:span 1; grid-row:span 1; }
+  .vcard .vmedia{ flex:1 1 auto; position:relative; overflow:hidden; min-height:0; }
+  .vcard .vmedia img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .vcard .vcap{ padding:13px 16px 14px; border-top:1px solid var(--line); flex:0 0 auto; }
+  .vcard .vcap .t{ font-size:14px; font-weight:650; margin-bottom:2px; letter-spacing:-0.005em; }
+  .vcard .vcap .c{ font-size:10.5px; color:var(--faint); text-transform:uppercase; letter-spacing:.06em; }
+  .vcard .vph{ position:absolute; inset:0; }
+  .vcard .soonmark{ position:absolute; top:11px; left:11px; font-size:9.5px; letter-spacing:.08em;
+    text-transform:uppercase; background:rgba(255,255,255,0.92); border:1px solid var(--line); color:var(--faint);
+    border-radius:100px; padding:4px 9px; font-weight:650; z-index:2; }
+  /* the trailing "+ more" tile — dashed, non-interactive, matches the Work
+     grid's own "+ Next project" slot */
+  .vcard.slot{
+    cursor:default; border-style:dashed; background:transparent;
+  }
+  .vcard.slot:hover{ transform:none; box-shadow:none; }
+  .vcard.slot .vmedia{ display:flex; align-items:center; justify-content:center; color:var(--faint); font-size:12.5px; text-align:center; padding:10px; }
+
+  @media (max-width:860px){
+    .vgrid{ grid-template-columns:1fr; grid-auto-rows:auto; }
+    .vcard.sz-big, .vcard.sz-wide, .vcard.sz-med, .vcard.sz-small{ grid-column:auto; grid-row:auto; }
+    .vcard .vmedia{ min-height:210px; }
+  }
+
+  /* ---------- item detail modal — solid white info rail (spans the full
+     panel height, flush top-to-bottom) + a centered preview card floating
+     over a blurred "glass" stage — the info rail is 0.382 of the viewport
+     width, the glass stage the 0.618 major (golden ratio, same proportion
+     the Work case-study page uses the other way round) ---------- */
+  .overlay{
+    position:fixed; inset:0; z-index:100; display:none;
+  }
+  .overlay.open{ display:flex; }
+
+  .info-rail{
+    width:38.2%; min-width:320px; max-width:600px; flex:0 0 auto;
+    height:100vh; background:#fff; border-right:1px solid var(--line);
+    overflow-y:auto; position:relative;
+    padding:64px 34px 30px; display:flex; flex-direction:column;
+  }
+  .info-rail .cat{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--faint); margin-bottom:8px; }
+  .info-rail h2{ margin:0 0 14px; font-size:20px; font-weight:680; letter-spacing:-0.01em; line-height:1.25; }
+  .info-rail .desc{ font-size:13.5px; line-height:1.7; color:#3a4356; margin-bottom:22px; }
+  .kv{ border-top:1px solid var(--line); padding:11px 0; display:flex; justify-content:space-between; gap:14px; }
+  .kv .k{ font-size:10.5px; color:var(--faint); text-transform:uppercase; letter-spacing:.05em; }
+  .kv .v{ font-size:12.5px; color:var(--ink); font-weight:650; text-align:right; }
+  .info-rail .open-link{ margin-top:auto; padding-top:18px; }
+  .info-rail .open-link a{ font-size:13px; font-weight:650; color:var(--amber); text-decoration:none; }
+
+  .glass-stage{
+    flex:1 1 auto; height:100vh; position:relative; overflow:hidden;
+    background:rgba(251,251,250,0.6); backdrop-filter:blur(18px) saturate(1.1);
+    display:flex; align-items:center; justify-content:center; padding:6vh 5vw;
+  }
+  .preview-card{
+    width:min(980px,100%); background:#fff; border-radius:16px; overflow:hidden;
+    border:1px solid var(--line); box-shadow:0 30px 80px rgba(26,34,51,0.22);
+    animation:pop .28s ease;
+  }
+  @keyframes pop{ from{ transform:scale(.97); opacity:0; } to{ transform:scale(1); opacity:1; } }
+  .media{ background:var(--mat); aspect-ratio:16/10; position:relative; }
+  .media iframe{ width:100%; height:100%; border:0; display:block; }
+  .media img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .media .phbig{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    color:#fff; font-size:15px; font-weight:650; letter-spacing:.02em; text-align:center; padding:0 40px; }
+
+  .ctrl{
+    position:absolute; top:18px; display:flex; align-items:center; justify-content:center;
+    width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,0.85);
+    border:1px solid var(--line); cursor:pointer; font-size:15px; color:var(--ink); z-index:5;
+    user-select:none;
+  }
+  .ctrl:hover{ background:#fff; }
+  .info-rail .ctrl.x{ left:18px; }
+  .glass-stage .ctrl.prev{ right:64px; } .glass-stage .ctrl.next{ right:18px; }
+
+  @media (max-width:860px){
+    .overlay.open{ flex-direction:column; overflow-y:auto; height:100vh; }
+    .info-rail{ width:100%; max-width:none; height:auto; min-height:0; border-right:none; border-bottom:1px solid var(--line); padding:56px 20px 24px; }
+    .glass-stage{ height:auto; min-height:320px; padding:24px 16px; }
+  }
+</style>
+</head>
+<body>
+  <div class="stickybar">
+    <a class="sb-h" href="index.html" title="Hanyu Liu">
+      <span class="sb-logo">H</span><span class="sb-hanzi">菡雨</span>
+    </a>
+    <nav>
+      <a href="index.html">Work</a>
+      <a href="vibe-coding.html" class="active">Vibe Coding</a>
+      <a href="about.html">About</a>
+    </nav>
+    <a class="sb-l" href="index.html" title="Hanyu Liu">
+      <span class="sb-logo">L</span><span class="sb-hanzi">刘</span>
+    </a>
+  </div>
+
+  <header class="sitehead">
+    <div class="mark cols4">
+      <a class="m1" href="index.html">HANYU</a>
+      <a class="m2" href="index.html">LIU</a>
+      <nav class="marknav">
+        <a href="index.html">Work</a>
+        <a href="vibe-coding.html" class="active">Vibe Coding</a>
+        <a href="about.html">About</a>
+      </nav>
+    </div>
+    <div class="hbar cols4">
+      <div class="hb bio">Business &amp; spatial strategist leading <b>digital transformation</b> —
+         GIS-backed site selection, brand strategy, and AI-native operations.</div>
+      <div class="hb status"><span class="dot"></span>Open to projects</div>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <header class="vintro">
+      <h1>Vibe coding</h1>
+      <p>Things built in conversation with AI — where I keep the decisions
+         (<b>the SOP, the thresholds, the taste</b>) and delegate the plumbing.
+         Click anything to open it.</p>
+    </header>
+
+    <div class="chips" id="chips">
+      <span class="chip on" data-cat="all">All</span>
+      <span class="chip" data-cat="ops">Ops Automation</span>
+      <span class="chip" data-cat="motion">Motion</span>
+      <span class="chip" data-cat="data">Data Modeling</span>
+    </div>
+
+    <div class="vgrid" id="grid"></div>
+  </div>
+
+  <!-- item detail: flush white info rail (0.382) + centered preview card
+       on a blurred glass stage (0.618) -->
+  <div class="overlay" id="overlay">
+    <div class="info-rail" id="infoRail">
+      <div class="ctrl x" id="btnX">✕</div>
+      <div class="cat" id="mCat"></div>
+      <h2 id="mTitle"></h2>
+      <div class="desc" id="mDesc"></div>
+      <div id="mKv"></div>
+      <div class="open-link" id="mLink"></div>
+    </div>
+    <div class="glass-stage">
+      <div class="ctrl prev" id="btnPrev">←</div>
+      <div class="ctrl next" id="btnNext">→</div>
+      <div class="preview-card">
+        <div class="media" id="mMedia"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="sitefoot">
+    summerhanyu@gmail.com · WeChat liuhanyuer · New York City
+  </footer>
+
+<script>
+const ITEMS = [
+  {
+    cat:'motion', catLabel:'Motion · Live demo', title:'Priced In — the black swan ledger', size:'big',
+    desc:'A live simulation of antifragility: ordinary days are noise, already priced in — no durable edge either way. Every so often the field throws a rare, oversized event, and the sliders let you tune how convex the payoff is and how exposed you stay. Watch how much of the cumulative line one rare day is responsible for.',
+    kv:{ Category:'Motion · Systems thinking', Stack:'Canvas · zero deps', Interaction:'4 sliders · live sim', Concept:'Antifragility / convexity' },
+    media:{ type:'iframe', src:'demos/antifragility-field.html' },
+    tile:{ type:'img', src:'assets/antifragility-thumb.jpg' }
+  },
+  {
+    cat:'ops', catLabel:'Ops Automation · Agents', title:'Trade-Ops Agent Pack', size:'wide',
+    desc:'Inquiry triage and order-update agents for a garment exporter: system prompts that encode the sales SOP, knowledge-base templates the team fills once and reuses everywhere. Platform-portable — same pack runs on Claude or domestic Chinese platforms.',
+    kv:{ Category:'Agents', Stack:'Prompt architecture', Portability:'Cross-platform', Status:'Delivered' },
+    media:{ type:'ph', label:'Prompt architecture — no UI to screenshot, that’s the point' },
+    tile:{ type:'ph', cls:'sw-teal' }
+  },
+  {
+    cat:'data', catLabel:'Data Modeling', title:'Portfolio Dashboard', size:'med',
+    desc:'Reserved space: an investment-portfolio dashboard and other numeric interfaces — built for my own ventures first, generalized later. This category grows as the lab produces.',
+    kv:{ Category:'Data Modeling', Stack:'TBD', Status:'In the lab' },
+    media:{ type:'ph', label:'In the lab — reserved for numeric interfaces' },
+    tile:{ type:'ph', cls:'sw-sand', soon:true }
+  },
+];
+
+const grid = document.getElementById('grid');
+ITEMS.forEach((it, i) => {
+  const d = document.createElement('div');
+  d.className = `vcard sz-${it.size}`; d.dataset.cat = it.cat; d.dataset.i = i;
+  if (it.tile.type === 'img') {
+    d.innerHTML = `<div class="vmedia"><img src="${it.tile.src}" alt="${it.title}"></div>
+      <div class="vcap"><div class="t">${it.title}</div><div class="c">${it.catLabel}</div></div>`;
+  } else {
+    d.innerHTML = `<div class="vmedia"><div class="vph ${it.tile.cls}"></div>
+      ${it.tile.soon ? '<span class="soonmark">Coming</span>' : ''}</div>
+      <div class="vcap"><div class="t">${it.title}</div><div class="c">${it.catLabel}</div></div>`;
+  }
+  d.addEventListener('click', () => openModal(i));
+  grid.appendChild(d);
+});
+
+// trailing "+ more" tile — always present, not part of the filterable/modal item set
+const slot = document.createElement('div');
+slot.className = 'vcard sz-small slot';
+slot.innerHTML = `<div class="vmedia">+ More — this lab keeps producing</div>`;
+grid.appendChild(slot);
+
+// filter
+document.getElementById('chips').addEventListener('click', e => {
+  const chip = e.target.closest('.chip'); if (!chip) return;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+  chip.classList.add('on');
+  const cat = chip.dataset.cat;
+  document.querySelectorAll('.vcard[data-cat]').forEach(t =>
+    t.classList.toggle('hidden', cat !== 'all' && t.dataset.cat !== cat));
+});
+
+// modal
+const overlay = document.getElementById('overlay');
+let cur = 0;
+function visibleIdx(){
+  const cat = document.querySelector('.chip.on').dataset.cat;
+  return ITEMS.map((it,i)=>({it,i})).filter(x => cat==='all'||x.it.cat===cat).map(x=>x.i);
+}
+function openModal(i){
+  cur = i;
+  const it = ITEMS[i];
+  document.getElementById('mCat').textContent = it.catLabel;
+  document.getElementById('mTitle').textContent = it.title;
+  document.getElementById('mDesc').textContent = it.desc;
+  document.getElementById('mKv').innerHTML = Object.entries(it.kv)
+    .map(([k,v]) => `<div class="kv"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('');
+  document.getElementById('mLink').innerHTML = it.link ? `<a href="${it.link.href}">${it.link.label}</a>` : '';
+  const m = document.getElementById('mMedia');
+  if (it.media.type === 'iframe') m.innerHTML = `<iframe src="${it.media.src}"></iframe>`;
+  else if (it.media.type === 'img') m.innerHTML = `<img src="${it.media.src}" alt="${it.title}">`;
+  else m.innerHTML = `<div class="ph ${ITEMS[i].tile.cls||''}" style="position:absolute;inset:0"></div><div class="phbig">${it.media.label}</div>`;
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(){
+  overlay.classList.remove('open');
+  document.getElementById('mMedia').innerHTML = '';
+  document.body.style.overflow = '';
+}
+function step(dir){
+  const vis = visibleIdx();
+  const pos = vis.indexOf(cur);
+  openModal(vis[(pos + dir + vis.length) % vis.length]);
+}
+document.getElementById('btnX').onclick = closeModal;
+document.getElementById('btnPrev').onclick = e => { e.stopPropagation(); step(-1); };
+document.getElementById('btnNext').onclick = e => { e.stopPropagation(); step(1); };
+overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+document.addEventListener('keydown', e => {
+  if (!overlay.classList.contains('open')) return;
+  if (e.key === 'Escape') closeModal();
+  if (e.key === 'ArrowLeft') step(-1);
+  if (e.key === 'ArrowRight') step(1);
+});
+</script>
+</body>
+</html>
